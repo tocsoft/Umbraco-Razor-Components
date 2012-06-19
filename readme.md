@@ -3,6 +3,7 @@ Umbraco-Razor-Components
 
 Helper extensions for razor support in Umbraco 4.x
 
+
 This Library adds 2 new features to RazorLibraryCore (`@Library.XXX()`)
 
 
@@ -37,6 +38,11 @@ This call can be used to retrieve a one or more crop urls form a media picker pr
 
 this calls falls back to using the umbracoFile property if needs must.
 
+
+
+##How to use
+
+add `@using Tocsoft.Umbraco.RazorComponents` to the top of your razor file and you will then be able to use the helper methods.
 
 ##Compatibility
 
