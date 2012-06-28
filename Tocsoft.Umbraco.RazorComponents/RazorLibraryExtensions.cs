@@ -24,6 +24,8 @@ namespace Tocsoft.Umbraco.RazorComponents
         {
             //converting object[] into a single hash table merging common property names,
             //overwriting previously inserted values.
+
+            //stupid macro propertiespropertyAliases are not case sensative !!!
             Hashtable attribs = new Hashtable();
             if (properties != null)
             {
@@ -33,10 +35,11 @@ namespace Tocsoft.Umbraco.RazorComponents
 
                     foreach (var d in dic)
                     {
-                        if (attribs.ContainsKey(d.Key))
-                            attribs[d.Key] = d.Value;
+                        var key = d.Key.ToLower();
+                        if (attribs.ContainsKey(key))
+                            attribs[key] = d.Value;
                         else
-                            attribs.Add(d.Key, d.Value);
+                            attribs.Add(key, d.Value);
                     }
                 }
             }
@@ -64,7 +67,9 @@ namespace Tocsoft.Umbraco.RazorComponents
                 macro = umbraco.macro.GetMacro(aliasOrPath);
             }
 
-            return macro.renderMacro(new Hashtable(), pageId);
+            macro.UpdateMacroModel(attribs);
+
+            return macro.renderMacro(attribs, pageId);
         }
 
         public static IHtmlString RenderMacro(this RazorLibraryCore ctx, string aliasOrPath, params object[] properties)
