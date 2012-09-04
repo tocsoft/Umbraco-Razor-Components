@@ -10,6 +10,9 @@ using Tocsoft.Common.Helpers.Web;
 using umbraco.cms.businesslogic.macro;
 using umbraco.MacroEngines;
 using umbraco.MacroEngines.Library;
+using System.Web.WebPages.Html;
+using umbraco.BusinessLogic;
+using umbraco.presentation;
 
 namespace Tocsoft.Umbraco.RazorComponents
 {
@@ -76,8 +79,37 @@ namespace Tocsoft.Umbraco.RazorComponents
         {
             //wrap the control returned in a ControlHtmlString that is used to render the control to a
             //string then exposes that string as a HtmlString so Razor will render the contents correctly
-            return new LazyHtmlString(()=> RenderMacro(ctx.Node.Id, aliasOrPath, properties));
+            return new LazyHtmlString(() => RenderMacro(ctx.Node.Id, aliasOrPath, properties));
         }
+
+        public static IHtmlString RenderUmbracoMacro(this HtmlHelper ctx, string aliasOrPath, params object[] properties)
+        {
+            //to allow rendering from other nonumbraco mvc pages
+            int id = (UmbracoContext.Current.PageId ?? -1);
+            //wrap the control returned in a ControlHtmlString that is used to render the control to a
+            //string then exposes that string as a HtmlString so Razor will render the contents correctly
+            return new LazyHtmlString(() => RenderMacro(id, aliasOrPath, properties));
+        }
+
+
+        public static dynamic UmbracoPage(this System.Web.WebPages.WebPageBase ctx)
+        {
+            //to allow rendering from other nonumbraco mvc pages
+            int id = (UmbracoContext.Current.PageId ?? -1);
+
+            return new DynamicNode(id);
+        }
+
+        public static RazorLibraryCore UmbracoLibrary(this System.Web.WebPages.WebPageBase ctx)
+        {
+            //to allow rendering from other nonumbraco mvc pages
+            int id = (UmbracoContext.Current.PageId ?? -1);
+
+            return new RazorLibraryCore(new umbraco.NodeFactory.Node(id));
+        }
+
+
+
 
         private static string ImageUrlFromMediaItem(RazorLibraryCore ctx, int mediaId, string cropProperty, string cropName)
         {
