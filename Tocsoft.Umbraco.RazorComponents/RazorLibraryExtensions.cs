@@ -82,7 +82,7 @@ namespace Tocsoft.Umbraco.RazorComponents
             return new LazyHtmlString(() => RenderMacro(ctx.Node.Id, aliasOrPath, properties));
         }
 
-        public static IHtmlString RenderUmbracoMacro(this HtmlHelper ctx, string aliasOrPath, params object[] properties)
+        public static IHtmlString RenderUmbracoMacro(this System.Web.WebPages.WebPageBase ctx, string aliasOrPath, params object[] properties)
         {
             //to allow rendering from other nonumbraco mvc pages
             int id = (UmbracoContext.Current.PageId ?? -1);
@@ -107,9 +107,6 @@ namespace Tocsoft.Umbraco.RazorComponents
 
             return new RazorLibraryCore(new umbraco.NodeFactory.Node(id));
         }
-
-
-
 
         private static string ImageUrlFromMediaItem(RazorLibraryCore ctx, int mediaId, string cropProperty, string cropName)
         {
