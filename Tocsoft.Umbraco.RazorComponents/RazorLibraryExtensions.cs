@@ -13,6 +13,8 @@ using umbraco.MacroEngines.Library;
 using System.Web.WebPages.Html;
 using umbraco.BusinessLogic;
 using umbraco.presentation;
+using umbraco;
+using umbraco.interfaces;
 
 namespace Tocsoft.Umbraco.RazorComponents
 {
@@ -74,6 +76,18 @@ namespace Tocsoft.Umbraco.RazorComponents
 
             return macro.renderMacro(attribs, pageId);
         }
+        
+        public static IHtmlString RichText(this RazorLibraryCore ctx, DynamicNode item, string alias)
+        {
+            return new LazyHtmlString(() => umbraco.library.RenderMacroContent(item.GetPropertyValue(alias), ctx.Node.Id));
+        }
+
+        public static IHtmlString RichText(this RazorLibraryCore ctx, string alias)
+        {
+            var dyNode = new DynamicNode(ctx.Node);
+
+            return ctx.RichText(dyNode, alias);
+        }
 
         public static IHtmlString RenderMacro(this RazorLibraryCore ctx, string aliasOrPath, params object[] properties)
         {
@@ -83,29 +97,35 @@ namespace Tocsoft.Umbraco.RazorComponents
         }
 
         public static IHtmlString RenderUmbracoMacro(this System.Web.WebPages.WebPageBase ctx, string aliasOrPath, params object[] properties)
-        {
-            //to allow rendering from other nonumbraco mvc pages
-            int id = (UmbracoContext.Current.PageId ?? -1);
+        {            
+            var page = CurrentOrHomePage();
+
             //wrap the control returned in a ControlHtmlString that is used to render the control to a
             //string then exposes that string as a HtmlString so Razor will render the contents correctly
-            return new LazyHtmlString(() => RenderMacro(id, aliasOrPath, properties));
+            return new LazyHtmlString(() => RenderMacro(page.Id, aliasOrPath, properties));
+        }
+
+        public static INode CurrentOrHomePage()
+        {
+            if (UmbracoContext.Current.PageId.HasValue)
+                return new umbraco.NodeFactory.Node(UmbracoContext.Current.PageId.Value);
+            else
+            {
+                var node = umbraco.uQuery.GetRootNode().Children[0];
+                HttpContext.Current.Items["pageID"] = node.Id;
+                return node;
+            }
         }
 
 
         public static dynamic UmbracoPage(this System.Web.WebPages.WebPageBase ctx)
         {
-            //to allow rendering from other nonumbraco mvc pages
-            int id = (UmbracoContext.Current.PageId ?? -1);
-
-            return new DynamicNode(id);
+            return new DynamicNode(CurrentOrHomePage());
         }
 
         public static RazorLibraryCore UmbracoLibrary(this System.Web.WebPages.WebPageBase ctx)
         {
-            //to allow rendering from other nonumbraco mvc pages
-            int id = (UmbracoContext.Current.PageId ?? -1);
-
-            return new RazorLibraryCore(new umbraco.NodeFactory.Node(id));
+            return new RazorLibraryCore(CurrentOrHomePage());
         }
 
         private static string ImageUrlFromMediaItem(RazorLibraryCore ctx, int mediaId, string cropProperty, string cropName)
