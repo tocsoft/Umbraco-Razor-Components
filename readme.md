@@ -1,3 +1,5 @@
+Not been mainted for over 10 years and targets an unsupported version of unbraco before razor was a mjor thing being used on that platform.
+
 Umbraco-Razor-Components
 ========================
 
